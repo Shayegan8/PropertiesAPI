@@ -1,7 +1,7 @@
 # The very simple properties api for minecraft plugins
 
 This is the very simple api that i just used it in my simple-bedwars
-Plugin it allocates memory like another apis too but with diffrent way
+plugin it allocates memory like another apis too but with diffrent way
 i'll add more safe api in another commits
 
 # syntax
