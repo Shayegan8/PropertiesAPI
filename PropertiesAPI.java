@@ -115,9 +115,6 @@ public class PropertiesAPI {
 		return 1;
 	}
 
-	private String alphabets[] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "k", "j", "l", "m", "n", "o", "p", "q",
-			"r", "s", "t", "u", "v", "w", "x", "y", "z" };
-
 	/**
 	 * @apiNote the method with lots of big o notations
 	 * @param key
@@ -267,7 +264,7 @@ public class PropertiesAPI {
 		return listlist;
 	}
         
-        	@SuppressWarnings("deprecation")
+    @SuppressWarnings("deprecation")
 	public Object getProperties(String key, Object defaultValue, String fileName) {
 		int i = 0;
 		String str = null;
