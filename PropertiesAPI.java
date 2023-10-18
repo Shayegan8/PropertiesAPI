@@ -1,5 +1,3 @@
-package api.properties;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -7,36 +5,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.nio.file.attribute.PosixFilePermission;
 
 import org.bukkit.material.MaterialData;
 
-import bedwars.BedWarsPlugin;
-
 /**
+ * @author Shayegan8
  * @apiNote this class is not threadsafe
  */
 public class PropertiesAPI {
 
 	protected static List<String> secretList;
 
-	protected String fileName;
+	protected static String fileName;
 
 	public List<String> getSecretList() {
 		return secretList;
 	}
 
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
+	public static void setFileName(String fileName) {
+		PropertiesAPI.fileName = fileName;
 	}
 
-	public String getFileName() {
-		return fileName;
+	public static String getFileName() {
+		return PropertiesAPI.fileName;
 	}
 
 	protected static List<Object> listlist;
@@ -45,10 +46,10 @@ public class PropertiesAPI {
 		return listlist;
 	}
 
-	public int getByID(String str, String fileName) {
+	public static int getByID(String str, String fileName) {
 		int n = 0;
-		while (n < readAllLines(fileName != null ? fileName : this.fileName).size()) {
-			if (readAllLines(fileName != null ? fileName : this.fileName).get(n).equals(str)) {
+		while (n < readAllLines(fileName != null ? fileName : PropertiesAPI.fileName).size()) {
+			if (readAllLines(fileName != null ? fileName : PropertiesAPI.fileName).get(n).equals(str)) {
 				return n;
 			}
 			n++;
@@ -56,9 +57,9 @@ public class PropertiesAPI {
 		return 000;
 	}
 
-	public List<String> readAllLines(String configFile) {
+	public static List<String> readAllLines(String configFile) {
 		List<String> lines = new ArrayList<>();
-		try (Scanner reader = new Scanner(new File(configFile != null ? configFile : this.fileName))) {
+		try (Scanner reader = new Scanner(new File(configFile != null ? configFile : PropertiesAPI.fileName))) {
 			while (reader.hasNextLine()) {
 				lines.add(reader.nextLine());
 			}
@@ -77,29 +78,55 @@ public class PropertiesAPI {
 		}
 		return lines;
 	}
-
+        
+        private static String attr = "rw-r--r--";
+        
+        private static FileAttribute<Set<PosixFilePermission>> attribute = PosixFilePermissions.asFileAttribute
+        (PosixFilePermissions.fromString(PropertiesAPI.attr));
+        
+        public static void setAttribute(String attr) {
+            attribute = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString(getAttributeString()));
+        }
+        
+        public static String getAttributeString() {
+            return attr;
+        }
+        
+        public String getAttributeString(int i) {
+            return attr;
+        }
+                
 	public PropertiesAPI(String fileName) {
-		this.fileName = fileName;
+		PropertiesAPI.fileName = fileName;
 		if (Files.notExists(Paths.get(fileName))) {
 			try {
-				Files.createFile(Paths.get(fileName), BedWarsPlugin.fileAttribute);
+				Files.createFile(Paths.get(fileName), PropertiesAPI.attribute);
 			} catch (IOException e) {
-				e.printStackTrace();
+                            throw new IllegalStateException("a problem with creating properties file\n", e);
 			}
 		}
 		try {
 			secretList = readAllLines(fileName);
 			listlist = new ArrayList<>();
 		} catch (Exception e) {
-			e.printStackTrace();
+                    throw new IllegalStateException("a problem with declaring for first time\n", e);
 		}
 	}
-
+        
+        static {
+                try {
+                    secretList = readAllLines("");
+                    listlist = new ArrayList<>();
+                } catch (Exception e) {
+                    throw new IllegalStateException("a problem with declaring for first time\n", e);
+                }
+            }
+        
 	public PropertiesAPI() {
 
 	}
 
-	public void declare() {
+	public static void declare() {
 		secretList = readAllLines(getFileName());
 		listlist = new ArrayList<>();
 	}
@@ -114,7 +141,9 @@ public class PropertiesAPI {
 		}
 		return 1;
 	}
-
+   
+        private static String alphabets[] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "k", "j", "l", "m", "n", "o", "p", "q",
+			"r", "s", "t", "u", "v", "w", "x", "y", "z" };
 	/**
 	 * @apiNote the method with lots of big o notations
 	 * @param key
@@ -124,7 +153,7 @@ public class PropertiesAPI {
 	 *         defaultValue
 	 */
 	@SuppressWarnings("deprecation")
-	public Object getProperties(String key, Object defaultValue) {
+	public static Object getProperties(String key, Object defaultValue) {
 		int i = 0;
 		String str = null;
 		List<String> kos = readAllLines(getFileName());
@@ -192,7 +221,7 @@ public class PropertiesAPI {
 			} else if (!kos.contains(key + "@")) {
 				if (defaultValue instanceof String) {
 					String rstr = (String) defaultValue;
-					if (Arrays.stream(alphabets).anyMatch(rstr::contains)) {
+					if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
 						rstr.replaceAll("&", "§");
 						return rstr;
 					}
@@ -205,7 +234,7 @@ public class PropertiesAPI {
 		if (kos.size() == 0) {
 			if (defaultValue instanceof String) {
 				String rstr = (String) defaultValue;
-				if (Arrays.stream(alphabets).anyMatch(rstr::contains)) {
+				if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
 					rstr.replaceAll("&", "§");
 					return rstr;
 				} else {
@@ -218,9 +247,9 @@ public class PropertiesAPI {
 		return null;
 	}
 
-	public void setListProperties(String key, String... args) {
+	public static void setListProperties(String key, String... args) {
 		int i = 0;
-		try (FileWriter writer = new FileWriter(this.fileName, true)) {
+		try (FileWriter writer = new FileWriter(PropertiesAPI.fileName, true)) {
 			writer.write("* " + key + "\n");
 			while (i < args.length) {
 				writer.write(i + " - " + args[i] + "\n");
@@ -234,17 +263,17 @@ public class PropertiesAPI {
 		}
 	}
 
-	public List<Object> getListProperties(String key, Object... defaultValues) {
+	public static List<Object> getListProperties(String key, Object... defaultValues) {
 		int i = 0;
-		while (i < readAllLines(this.fileName).size()) {
-			if (readAllLines(this.fileName).get(i).equals("* " + key)) {
-				int ini = getByID("* " + key, this.fileName);
-				int ini2 = getByID("* endif " + key, fileName);
+		while (i < readAllLines(PropertiesAPI.fileName).size()) {
+			if (readAllLines(PropertiesAPI.fileName).get(i).equals("* " + key)) {
+				int ini = getByID("* " + key, PropertiesAPI.fileName);
+				int ini2 = getByID("* endif " + key, PropertiesAPI.fileName);
 				while (ini < ini2) {
 					ini++;
-					listlist.add(readAllLines(this.fileName).get(ini));
+					listlist.add(readAllLines(PropertiesAPI.fileName).get(ini));
 				}
-			} else if (!readAllLines(this.fileName).contains("* " + key)) {
+			} else if (!readAllLines(PropertiesAPI.fileName).contains("* " + key)) {
 				List<Object> ls = new ArrayList<Object>();
 				for (int n = 0; n < defaultValues.length; n++) {
 					if (defaultValues[n] instanceof String) {
@@ -264,8 +293,8 @@ public class PropertiesAPI {
 		return listlist;
 	}
         
-    @SuppressWarnings("deprecation")
-	public Object getProperties(String key, Object defaultValue, String fileName) {
+        @SuppressWarnings("deprecation")
+	public static Object getProperties(String key, Object defaultValue, String fileName) {
 		int i = 0;
 		String str = null;
 		List<String> kos = readAllLines(fileName);
@@ -319,7 +348,7 @@ public class PropertiesAPI {
 					String bdv = (String) defaultValue;
 					if (bdv.contains("&") || !bdv.contains("&")) {
 						if (defaultValue instanceof String) {
-							if (Arrays.stream(alphabets).anyMatch(bdv::contains)) {
+							if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(bdv::contains)) {
 								bdv.replaceAll("&", "§");
 								return bdv;
 							} else {
@@ -333,7 +362,7 @@ public class PropertiesAPI {
 			} else if (!kos.contains(key + "@")) {
 				if (defaultValue instanceof String) {
 					String rstr = (String) defaultValue;
-					if (Arrays.stream(alphabets).anyMatch(rstr::contains)) {
+					if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
 						rstr.replaceAll("&", "§");
 						return rstr;
 					}
@@ -346,7 +375,7 @@ public class PropertiesAPI {
 		if (kos.size() == 0) {
 			if (defaultValue instanceof String) {
 				String rstr = (String) defaultValue;
-				if (Arrays.stream(alphabets).anyMatch(rstr::contains)) {
+				if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
 					rstr.replaceAll("&", "§");
 					return rstr;
 				} else {
@@ -359,13 +388,13 @@ public class PropertiesAPI {
 		return null;
 	}
 
-	public void fakeFree() {
+	public static void fakeFree() {
 		listlist = null;
 		secretList = null;
 	}
 
-	public void setProperties(String key, String value, String fileName) {
-		try (FileWriter writer = new FileWriter(fileName != null ? fileName : this.fileName, true)) {
+	public static void setProperties(String key, String value, String fileName) {
+		try (FileWriter writer = new FileWriter(fileName != null ? fileName : PropertiesAPI.fileName, true)) {
 			writer.write(key + "@" + value + "\n");
 			writer.flush();
 		} catch (IOException e) {
