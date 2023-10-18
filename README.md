@@ -2,7 +2,7 @@
 
 This is the very simple api that i just used it in my simple-bedwars
 plugin it allocates memory like another apis too but with diffrent way
-i'll add more safe api in another commits
+i'll add safe api in another commits
 
 # syntax
 
