@@ -7,15 +7,15 @@ i'll add more safe api in another commits
 # syntax
 
 > ```
-
-  key@value
-
-  * anlist
-  - value1
-  - value2
-  - value3
-  * endif anlist
-  
+>
+>  key@value
+>
+>  * anlist
+>  - value1
+>  - value2
+>  - value3
+> * endif anlist
+>  
 > ```
 
 # note
