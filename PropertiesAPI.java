@@ -1,3 +1,4 @@
+
 /**
  *
  * GNU GENERAL PUBLIC LICENSE
@@ -940,7 +941,12 @@ public class PropertiesAPI {
                 int ini2 = getByID("* endif " + key, PropertiesAPI.fileName);
                 while (ini < ini2) {
                     ini++;
-                    listlist.add(readAllLines(PropertiesAPI.fileName).get(ini));
+                    if (IsNumber.isNumber(readAllLines(PropertiesAPI.fileName).get(ini).split("@", 2)[1])) {
+                        listlist.add(Integer.valueOf(readAllLines(PropertiesAPI.fileName)
+                                .get(ini).split("@", 2)[1]));
+                    } else if (readAllLines(PropertiesAPI.fileName).get(ini).split("@", 2)[1].contains(".")) {
+                        listlist.add(Double.valueOf(readAllLines(PropertiesAPI.fileName).get(ini).split("@", 2)[1]));
+                    }
                 }
             } else if (!readAllLines(PropertiesAPI.fileName).contains("* " + key)) {
                 List<Object> ls = new ArrayList<Object>();
@@ -1067,14 +1073,15 @@ public class PropertiesAPI {
         listlist = null;
         secretList = null;
     }
-    
+
     public static void fakeFreeListList() {
         listlist = null;
     }
-    
+
     public static void fakeFreeSecretList() {
         secretList = null;
     }
+
     /**
      * @param key
      * @param value
