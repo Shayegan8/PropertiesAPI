@@ -588,7 +588,6 @@
  * License instead of this License. But first, please read
  * <https://www.gnu.org/licenses/why-not-lgpl.html>.
  */
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -815,21 +814,18 @@ public class PropertiesAPI {
     public static Object getProperties(String key, Object defaultValue) {
         int i = 0;
         String str = null;
-        List<String> kos = readAllLines(getFileName());
-        List<String> v1_8_R3 = readAllLines(
-                PropertiesAPI.class.getClassLoader().getResourceAsStream("MaterialSourceReader"));
-        while (i < kos.size()) {
-            List<Character> ls = IntStream.range(0, kos.get(i).toCharArray().length).mapToObj((x) -> (char) x)
+        while (i < readAllLines(getFileName()).size()) {
+            List<Character> ls = IntStream.range(0, readAllLines(getFileName()).get(i).toCharArray().length).mapToObj((x) -> (char) x)
                     .collect(Collectors.toList());
-            str = kos.get(i).split("@")[1];
-            if (kos.get(i).contains(key + "@") && !kos.get(i).equals(key + "@")) {
-                if (kos.get(i).contains("&")) {
+            str = readAllLines(getFileName()).get(i).split("@")[1];
+            if (readAllLines(getFileName()).get(i).contains(key + "@") && !readAllLines(getFileName()).get(i).equals(key + "@")) {
+                if (readAllLines(getFileName()).get(i).contains("&")) {
                     str.replaceAll("&", "§");
                     return str;
 
                 } else if (ls != null) {
-                    if (!kos.get(i).equals(key + "@")) {
-                        str = kos.get(i).split("@")[1];
+                    if (!readAllLines(getFileName()).get(i).equals(key + "@")) {
+                        str = readAllLines(getFileName()).get(i).split("@")[1];
                     }
                     int n = 0;
                     while (n < ls.size()) {
@@ -845,7 +841,8 @@ public class PropertiesAPI {
                                 sexstring = ls.get(0).toString() + ls.get(1).toString() + ls.get(2).toString()
                                         + ls.get(3).toString();
                             }
-                            if (v1_8_R3.get(n).contains(sexstring)) {
+                            if (readAllLines(
+                                    PropertiesAPI.class.getClassLoader().getResourceAsStream("MaterialSourceReader")).get(n).contains(sexstring)) {
                                 return new MaterialData(Integer.valueOf(ls.get(n))).getItemType();
                             }
                         }
@@ -861,7 +858,7 @@ public class PropertiesAPI {
                 }
             }
 
-            if (kos.get(i).equals(key + "@")) {
+            if (readAllLines(getFileName()).get(i).equals(key + "@")) {
                 if (defaultValue instanceof String) {
                     String bdv = (String) defaultValue;
                     if (bdv.contains("&") || !bdv.contains("&")) {
@@ -877,7 +874,7 @@ public class PropertiesAPI {
                         }
                     }
                 }
-            } else if (!kos.contains(key + "@")) {
+            } else if (!readAllLines(getFileName()).contains(key + "@")) {
                 if (defaultValue instanceof String) {
                     String rstr = (String) defaultValue;
                     if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
@@ -890,7 +887,7 @@ public class PropertiesAPI {
             }
             i++;
         }
-        if (kos.size() == 0) {
+        if (readAllLines(getFileName()).isEmpty()) {
             if (defaultValue instanceof String) {
                 String rstr = (String) defaultValue;
                 if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
@@ -977,21 +974,20 @@ public class PropertiesAPI {
     public static Object getProperties(String key, Object defaultValue, String fileName) {
         int i = 0;
         String str = null;
-        List<String> kos = readAllLines(fileName);
         List<String> v1_8_R3 = readAllLines(
                 PropertiesAPI.class.getClassLoader().getResourceAsStream("MaterialSourceReader"));
-        while (i < kos.size()) {
-            List<Character> ls = IntStream.range(0, kos.get(i).toCharArray().length).mapToObj((x) -> (char) x)
+        while (i < readAllLines(fileName).size()) {
+            List<Character> ls = IntStream.range(0, readAllLines(fileName).get(i).toCharArray().length).mapToObj((x) -> (char) x)
                     .collect(Collectors.toList());
-            str = kos.get(i).split("@")[1];
-            if (kos.get(i).contains(key + "@") && !kos.get(i).equals(key + "@")) {
-                if (kos.get(i).contains("&")) {
+            str = readAllLines(fileName).get(i).split("@")[1];
+            if (readAllLines(fileName).get(i).contains(key + "@") && !readAllLines(fileName).get(i).equals(key + "@")) {
+                if (readAllLines(fileName).get(i).contains("&")) {
                     str.replaceAll("&", "§");
                     return str;
 
                 } else if (ls != null) {
-                    if (!kos.get(i).equals(key + "@")) {
-                        str = kos.get(i).split("@")[1];
+                    if (!readAllLines(fileName).get(i).equals(key + "@")) {
+                        str = readAllLines(fileName).get(i).split("@")[1];
                     }
                     int n = 0;
                     while (n < ls.size()) {
@@ -1023,7 +1019,7 @@ public class PropertiesAPI {
                 }
             }
 
-            if (kos.get(i).equals(key + "@")) {
+            if (readAllLines(fileName).get(i).equals(key + "@")) {
                 if (defaultValue instanceof String) {
                     String bdv = (String) defaultValue;
                     if (bdv.contains("&") || !bdv.contains("&")) {
@@ -1039,7 +1035,7 @@ public class PropertiesAPI {
                         }
                     }
                 }
-            } else if (!kos.contains(key + "@")) {
+            } else if (!readAllLines(fileName).contains(key + "@")) {
                 if (defaultValue instanceof String) {
                     String rstr = (String) defaultValue;
                     if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
@@ -1052,7 +1048,7 @@ public class PropertiesAPI {
             }
             i++;
         }
-        if (kos.size() == 0) {
+        if (readAllLines(fileName).isEmpty()) {
             if (defaultValue instanceof String) {
                 String rstr = (String) defaultValue;
                 if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
