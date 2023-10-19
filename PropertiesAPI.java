@@ -1067,7 +1067,14 @@ public class PropertiesAPI {
         listlist = null;
         secretList = null;
     }
-
+    
+    public static void fakeFreeListList() {
+        listlist = null;
+    }
+    
+    public static void fakeFreeSecretList() {
+        secretList = null;
+    }
     /**
      * @param key
      * @param value
