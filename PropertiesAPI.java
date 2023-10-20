@@ -615,7 +615,7 @@ public class PropertiesAPI {
 
     private static List<String> secretList;
     protected static List<Object> listlist;
-    private static String fileName;
+    private static String fileName = "";
     private static String attr = "rw-r--r--";
     private static FileAttribute<Set<PosixFilePermission>> attribute = PosixFilePermissions
             .asFileAttribute(PosixFilePermissions.fromString(PropertiesAPI.attr));
@@ -717,6 +717,7 @@ public class PropertiesAPI {
      * @param attr
      */
     public static void setAttribute(String attr) {
+        PropertiesAPI.attr = attr;
         attribute = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString(getAttributeString()));
     }
 
@@ -811,21 +812,22 @@ public class PropertiesAPI {
      * @return object
      */
     @SuppressWarnings("deprecation")
-    public static Object getProperties(String key, Object defaultValue) {
+    public static Object getProperties(String key, Object defaultValue, String fileName) {
         int i = 0;
         String str = null;
-        while (i < readAllLines(getFileName()).size()) {
-            List<Character> ls = IntStream.range(0, readAllLines(getFileName()).get(i).toCharArray().length).mapToObj((x) -> (char) x)
+        String file = PropertiesAPI.fileName != null ? PropertiesAPI.fileName : fileName;
+        while (i < readAllLines(file).size()) {
+            List<Character> ls = IntStream.range(0, readAllLines(file).get(i).toCharArray().length).mapToObj((x) -> (char) x)
                     .collect(Collectors.toList());
-            str = readAllLines(getFileName()).get(i).split("@")[1];
-            if (readAllLines(getFileName()).get(i).contains(key + "@") && !readAllLines(getFileName()).get(i).equals(key + "@")) {
-                if (readAllLines(getFileName()).get(i).contains("&")) {
+            str = readAllLines(file).get(i).split("@")[1];
+            if (readAllLines(file).get(i).contains(key + "@") && !readAllLines(file).get(i).equals(key + "@")) {
+                if (readAllLines(file).get(i).contains("&")) {
                     str.replaceAll("&", "§");
                     return str;
 
                 } else if (ls != null) {
-                    if (!readAllLines(getFileName()).get(i).equals(key + "@")) {
-                        str = readAllLines(getFileName()).get(i).split("@")[1];
+                    if (!readAllLines(file).get(i).equals(key + "@")) {
+                        str = readAllLines(file).get(i).split("@")[1];
                     }
                     int n = 0;
                     while (n < ls.size()) {
@@ -858,7 +860,7 @@ public class PropertiesAPI {
                 }
             }
 
-            if (readAllLines(getFileName()).get(i).equals(key + "@")) {
+            if (readAllLines(file).get(i).equals(key + "@")) {
                 if (defaultValue instanceof String) {
                     String bdv = (String) defaultValue;
                     if (bdv.contains("&") || !bdv.contains("&")) {
@@ -874,7 +876,7 @@ public class PropertiesAPI {
                         }
                     }
                 }
-            } else if (!readAllLines(getFileName()).contains(key + "@")) {
+            } else if (!readAllLines(file).contains(key + "@")) {
                 if (defaultValue instanceof String) {
                     String rstr = (String) defaultValue;
                     if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
@@ -887,7 +889,7 @@ public class PropertiesAPI {
             }
             i++;
         }
-        if (readAllLines(getFileName()).isEmpty()) {
+        if (readAllLines(file).isEmpty()) {
             if (defaultValue instanceof String) {
                 String rstr = (String) defaultValue;
                 if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
@@ -905,11 +907,12 @@ public class PropertiesAPI {
 
     /**
      * @param key
+     * @param fileName
      * @param args
      */
-    public static void setListProperties(String key, String... args) {
+    public static void setListProperties(String key, String fileName, String... args) {
         int i = 0;
-        try (FileWriter writer = new FileWriter(PropertiesAPI.fileName, true)) {
+        try (FileWriter writer = new FileWriter(PropertiesAPI.fileName != null ? PropertiesAPI.fileName : fileName, true)) {
             writer.write("* " + key + "\n");
             while (i < args.length) {
                 writer.write(i + " - " + args[i] + "\n");
@@ -926,26 +929,28 @@ public class PropertiesAPI {
     /**
      *
      * @param key
+     * @param fileName
      * @param defaultValues
      * @return list of columns in your list
      */
-    public static List<Object> getListProperties(String key, Object... defaultValues) {
+    public static List<Object> getListProperties(String key, String fileName, Object... defaultValues) {
         int i = 0;
-        while (i < readAllLines(PropertiesAPI.fileName).size()) {
-            if (readAllLines(PropertiesAPI.fileName).get(i).equals("* " + key)) {
-                int ini = getByID("* " + key, PropertiesAPI.fileName);
-                int ini2 = getByID("* endif " + key, PropertiesAPI.fileName);
+        String file = PropertiesAPI.fileName != null ? PropertiesAPI.fileName : fileName;
+        while (i < readAllLines(file).size()) {
+            if (readAllLines(file).get(i).equals("* " + key)) {
+                int ini = getByID("* " + key, file);
+                int ini2 = getByID("* endif " + key, file);
                 while (ini < ini2) {
                     ini++;
-                    if (IsNumber.isNumber(readAllLines(PropertiesAPI.fileName).get(ini).split("@", 2)[1])) {
-                        listlist.add(Integer.valueOf(readAllLines(PropertiesAPI.fileName)
+                    if (IsNumber.isNumber(readAllLines(file).get(ini).split("@", 2)[1])) {
+                        listlist.add(Integer.valueOf(readAllLines(file)
                                 .get(ini).split("@", 2)[1]));
-                    } else if (readAllLines(PropertiesAPI.fileName).get(ini).split("@", 2)[1].contains(".")) {
-                        listlist.add(Double.valueOf(readAllLines(PropertiesAPI.fileName).get(ini).split("@", 2)[1]));
+                    } else if (readAllLines(file).get(ini).split("@", 2)[1].contains(".")) {
+                        listlist.add(Double.valueOf(readAllLines(file).get(ini).split("@", 2)[1]));
                     }
                 }
-            } else if (!readAllLines(PropertiesAPI.fileName).contains("* " + key)) {
-                List<Object> ls = new ArrayList<Object>();
+            } else if (!readAllLines(file).contains("* " + key)) {
+                List<Object> ls = new ArrayList<>();
                 for (int n = 0; n < defaultValues.length; n++) {
                     if (defaultValues[n] instanceof String) {
                         String jende = ((String) defaultValues[n]).replaceAll("&", "§");
@@ -967,101 +972,11 @@ public class PropertiesAPI {
     /**
      * @param key
      * @param defaultValue
-     * @param fileName
      * @return object
      */
     @SuppressWarnings("deprecation")
-    public static Object getProperties(String key, Object defaultValue, String fileName) {
-        int i = 0;
-        String str = null;
-        List<String> v1_8_R3 = readAllLines(
-                PropertiesAPI.class.getClassLoader().getResourceAsStream("MaterialSourceReader"));
-        while (i < readAllLines(fileName).size()) {
-            List<Character> ls = IntStream.range(0, readAllLines(fileName).get(i).toCharArray().length).mapToObj((x) -> (char) x)
-                    .collect(Collectors.toList());
-            str = readAllLines(fileName).get(i).split("@")[1];
-            if (readAllLines(fileName).get(i).contains(key + "@") && !readAllLines(fileName).get(i).equals(key + "@")) {
-                if (readAllLines(fileName).get(i).contains("&")) {
-                    str.replaceAll("&", "§");
-                    return str;
-
-                } else if (ls != null) {
-                    if (!readAllLines(fileName).get(i).equals(key + "@")) {
-                        str = readAllLines(fileName).get(i).split("@")[1];
-                    }
-                    int n = 0;
-                    while (n < ls.size()) {
-                        if (IsNumber.isNumber(ls.get(n))) {
-                            String sexstring = null;
-                            if (ls.size() == 0) {
-                                sexstring = ls.get(0).toString();
-                            } else if (ls.size() == 1) {
-                                sexstring = ls.get(0).toString() + ls.get(1).toString();
-                            } else if (ls.size() == 2) {
-                                sexstring = ls.get(0).toString() + ls.get(1).toString() + ls.get(2);
-                            } else if (ls.size() == 3) {
-                                sexstring = ls.get(0).toString() + ls.get(1).toString() + ls.get(2).toString()
-                                        + ls.get(3).toString();
-                            }
-                            if (v1_8_R3.get(n).contains(sexstring)) {
-                                return new MaterialData(Integer.valueOf(ls.get(n))).getItemType();
-                            }
-                        }
-                        n++;
-                    }
-
-                } else if (IsNumber.isNumber(str)) {
-                    return Integer.parseInt(str);
-                } else if (str.contains(".")) {
-                    return Double.parseDouble(str);
-                } else {
-                    return str;
-                }
-            }
-
-            if (readAllLines(fileName).get(i).equals(key + "@")) {
-                if (defaultValue instanceof String) {
-                    String bdv = (String) defaultValue;
-                    if (bdv.contains("&") || !bdv.contains("&")) {
-                        if (defaultValue instanceof String) {
-                            if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(bdv::contains)) {
-                                bdv.replaceAll("&", "§");
-                                return bdv;
-                            } else {
-                                return bdv;
-                            }
-                        } else {
-                            return defaultValue;
-                        }
-                    }
-                }
-            } else if (!readAllLines(fileName).contains(key + "@")) {
-                if (defaultValue instanceof String) {
-                    String rstr = (String) defaultValue;
-                    if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
-                        rstr.replaceAll("&", "§");
-                        return rstr;
-                    }
-                } else {
-                    return defaultValue;
-                }
-            }
-            i++;
-        }
-        if (readAllLines(fileName).isEmpty()) {
-            if (defaultValue instanceof String) {
-                String rstr = (String) defaultValue;
-                if (Arrays.stream(PropertiesAPI.alphabets).anyMatch(rstr::contains)) {
-                    rstr.replaceAll("&", "§");
-                    return rstr;
-                } else {
-                    return defaultValue;
-                }
-            } else {
-                return defaultValue;
-            }
-        }
-        return null;
+    public static Object getProperties(String key, Object defaultValue) {
+        return getProperties(key, defaultValue, PropertiesAPI.fileName);
     }
 
     public static void fakeFree() {
@@ -1099,9 +1014,9 @@ class IsNumber {
 
     static {
         try {
-            strchars = new ArrayList<Character>();
+            strchars = new ArrayList<>();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Problem with static constructor:\n", e);
         }
     }
 
@@ -1139,10 +1054,11 @@ class IsNumber {
     }
 
     public static boolean isNumber(char chr) {
-        return Character.isDigit(chr) ? true : false;
+        return Character.isDigit(chr);
     }
 
     public static void fakeFree() {
         strchars = null;
     }
+
 }
