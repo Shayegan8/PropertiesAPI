@@ -588,6 +588,7 @@
  * License instead of this License. But first, please read
  * <https://www.gnu.org/licenses/why-not-lgpl.html>.
  */
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -614,7 +615,7 @@ import org.bukkit.material.MaterialData;
 public class PropertiesAPI {
 
     private static List<String> secretList;
-    protected static List<Object> listlist;
+    private static List<Object> listlist;
     private static String fileName = "";
     private static String attr = "rw-r--r--";
     private static FileAttribute<Set<PosixFilePermission>> attribute = PosixFilePermissions
@@ -637,14 +638,14 @@ public class PropertiesAPI {
     /**
      * @param fileName
      */
-    public static void setFileName(String fileName) {
+    public void setFileName(String fileName) {
         PropertiesAPI.fileName = fileName;
     }
 
     /**
      * @return fileName
      */
-    public static String getFileName() {
+    public String getFileName() {
         return PropertiesAPI.fileName;
     }
 
@@ -667,7 +668,7 @@ public class PropertiesAPI {
      * @return if file contains your thing it returns the line number if not it
      * returns -1
      */
-    public static int getByID(String str, String fileName) {
+    public int getByID(String str, String fileName) {
         int n = 0;
         while (n < readAllLines(fileName != null ? fileName : PropertiesAPI.fileName).size()) {
             if (readAllLines(fileName != null ? fileName : PropertiesAPI.fileName).get(n).equals(str)) {
@@ -683,7 +684,7 @@ public class PropertiesAPI {
      * @param configFile
      * @return
      */
-    public static List<String> readAllLines(String configFile) {
+    public List<String> readAllLines(String configFile) {
         List<String> lines = new ArrayList<>();
         try (Scanner reader = new Scanner(new File(configFile != null ? configFile : PropertiesAPI.fileName))) {
             while (reader.hasNextLine()) {
@@ -703,7 +704,7 @@ public class PropertiesAPI {
      * @param configFile
      * @return
      */
-    public static List<String> readAllLines(InputStream configFile) {
+    public List<String> readAllLines(InputStream configFile) {
         List<String> lines = new ArrayList<>();
         try (Scanner reader = new Scanner(configFile)) {
             while (reader.hasNextLine()) {
@@ -716,7 +717,7 @@ public class PropertiesAPI {
     /**
      * @param attr
      */
-    public static void setAttribute(String attr) {
+    public void setAttribute(String attr) {
         PropertiesAPI.attr = attr;
         attribute = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString(getAttributeString()));
     }
@@ -724,7 +725,7 @@ public class PropertiesAPI {
     /**
      * @return the file attribute string
      */
-    public static String getAttributeString() {
+    public String getAttributeString() {
         return attr;
     }
 
@@ -759,7 +760,8 @@ public class PropertiesAPI {
     public PropertiesAPI() {
 
     }
-
+    
+    /**
     static {
         try {
             secretList = readAllLines("");
@@ -767,14 +769,14 @@ public class PropertiesAPI {
         } catch (Exception e) {
             throw new IllegalStateException("a problem with declaring for first time\n", e);
         }
-    }
+    }*/
 
     /**
      * <p>
      * if you're using PropertiesAPI constructor with no parameter you have to
      * declare all lines and an list for getListProperties()</p>
      */
-    public static void declare() {
+    public void declare() {
         secretList = readAllLines(getFileName());
         listlist = new ArrayList<>();
     }
@@ -788,7 +790,7 @@ public class PropertiesAPI {
      * @param name
      * @return line number
      */
-    public static int getStringId(String name) {
+    public int getStringId(String name) {
         int i = 0;
         while (i >= secretList.size()) {
             if (secretList.get(i).contains(name)) {
@@ -802,7 +804,7 @@ public class PropertiesAPI {
     /**
      * @return an array of alphabets
      */
-    public static String[] getAlphabets() {
+    public String[] getAlphabets() {
         return PropertiesAPI.alphabets;
     }
 
@@ -812,7 +814,7 @@ public class PropertiesAPI {
      * @return object
      */
     @SuppressWarnings("deprecation")
-    public static Object getProperties(String key, Object defaultValue, String fileName) {
+    public Object getProperties(String key, Object defaultValue, String fileName) {
         int i = 0;
         String str = null;
         String file = PropertiesAPI.fileName != null ? PropertiesAPI.fileName : fileName;
@@ -910,7 +912,7 @@ public class PropertiesAPI {
      * @param fileName
      * @param args
      */
-    public static void setListProperties(String key, String fileName, String... args) {
+    public void setListProperties(String key, String fileName, String... args) {
         int i = 0;
         try (FileWriter writer = new FileWriter(PropertiesAPI.fileName != null ? PropertiesAPI.fileName : fileName, true)) {
             writer.write("* " + key + "\n");
@@ -925,7 +927,12 @@ public class PropertiesAPI {
             throw new IllegalStateException("a problem with creating properties list, file not found\n" + e);
         }
     }
-
+    
+    public void main(String[] args) {
+        PropertiesAPI api = new PropertiesAPI("~/Desktop/sfile");
+        System.out.println(api.getListProperties("kossher", null, "kir", "koso", "kon"));
+    }
+    
     /**
      *
      * @param key
@@ -933,7 +940,7 @@ public class PropertiesAPI {
      * @param defaultValues
      * @return list of columns in your list
      */
-    public static List<Object> getListProperties(String key, String fileName, Object... defaultValues) {
+    public List<Object> getListProperties(String key, String fileName, Object... defaultValues) {
         int i = 0;
         String file = PropertiesAPI.fileName != null ? PropertiesAPI.fileName : fileName;
         while (i < readAllLines(file).size()) {
@@ -975,20 +982,20 @@ public class PropertiesAPI {
      * @return object
      */
     @SuppressWarnings("deprecation")
-    public static Object getProperties(String key, Object defaultValue) {
+    public Object getProperties(String key, Object defaultValue) {
         return getProperties(key, defaultValue, PropertiesAPI.fileName);
     }
 
-    public static void fakeFree() {
+    public void fakeFree() {
         listlist = null;
         secretList = null;
     }
 
-    public static void fakeFreeListList() {
+    public void fakeFreeListList() {
         listlist = null;
     }
 
-    public static void fakeFreeSecretList() {
+    public void fakeFreeSecretList() {
         secretList = null;
     }
 
@@ -997,7 +1004,7 @@ public class PropertiesAPI {
      * @param value
      * @param fileName
      */
-    public static void setProperties(String key, String value, String fileName) {
+    public void setProperties(String key, String value, String fileName) {
         try (FileWriter writer = new FileWriter(fileName != null ? fileName : PropertiesAPI.fileName, true)) {
             writer.write(key + "@" + value + "\n");
             writer.flush();
