@@ -760,16 +760,6 @@ public class PropertiesAPI {
     public PropertiesAPI() {
 
     }
-    
-    /**
-    static {
-        try {
-            secretList = readAllLines("");
-            listlist = new ArrayList<>();
-        } catch (Exception e) {
-            throw new IllegalStateException("a problem with declaring for first time\n", e);
-        }
-    }*/
 
     /**
      * <p>
@@ -811,6 +801,7 @@ public class PropertiesAPI {
     /**
      * @param key
      * @param defaultValue
+     * @param fileName
      * @return object
      */
     @SuppressWarnings("deprecation")
@@ -833,7 +824,7 @@ public class PropertiesAPI {
                     }
                     int n = 0;
                     while (n < ls.size()) {
-                        if (IsNumber.isNumber(ls.get(n))) {
+                        if (Character.isDigit(ls.get(n))) {
                             String sexstring = null;
                             if (ls.size() == 0) {
                                 sexstring = ls.get(0).toString();
@@ -853,7 +844,7 @@ public class PropertiesAPI {
                         n++;
                     }
 
-                } else if (IsNumber.isNumber(str)) {
+                } else if (isNum(str)) {
                     return Integer.parseInt(str);
                 } else if (str.contains(".")) {
                     return Double.parseDouble(str);
@@ -928,49 +919,35 @@ public class PropertiesAPI {
         }
     }
     
-    public void main(String[] args) {
-        PropertiesAPI api = new PropertiesAPI("~/Desktop/sfile");
-        System.out.println(api.getListProperties("kossher", null, "kir", "koso", "kon"));
-    }
-    
     /**
-     *
+     * 
      * @param key
      * @param fileName
      * @param defaultValues
-     * @return list of columns in your list
+     * @return 
      */
-    public List<Object> getListProperties(String key, String fileName, Object... defaultValues) {
-        int i = 0;
-        String file = PropertiesAPI.fileName != null ? PropertiesAPI.fileName : fileName;
-        while (i < readAllLines(file).size()) {
-            if (readAllLines(file).get(i).equals("* " + key)) {
-                int ini = getByID("* " + key, file);
-                int ini2 = getByID("* endif " + key, file);
-                while (ini < ini2) {
-                    ini++;
-                    if (IsNumber.isNumber(readAllLines(file).get(ini).split("@", 2)[1])) {
-                        listlist.add(Integer.valueOf(readAllLines(file)
-                                .get(ini).split("@", 2)[1]));
-                    } else if (readAllLines(file).get(ini).split("@", 2)[1].contains(".")) {
-                        listlist.add(Double.valueOf(readAllLines(file).get(ini).split("@", 2)[1]));
-                    }
+    public List<Object> getListProperties(String key, String fileName, String... defaultValues) {
+        String file = getFileName() != null ? PropertiesAPI.fileName : fileName;
+        if (!secretList.contains("* " + key)) {
+            List<Object> ls = new ArrayList<>();
+            for (int n = 0; n < defaultValues.length; n++) {
+                if (defaultValues[n].contains("&")) {
+                    String jende = ((String) defaultValues[n]).replaceAll("&", "§");
+                    ls.add(jende);
+                } else {
+                    ls.add(defaultValues[n]);
                 }
-            } else if (!readAllLines(file).contains("* " + key)) {
-                List<Object> ls = new ArrayList<>();
-                for (int n = 0; n < defaultValues.length; n++) {
-                    if (defaultValues[n] instanceof String) {
-                        String jende = ((String) defaultValues[n]).replaceAll("&", "§");
-                        ls.add(jende);
-                    } else {
-                        ls.add(defaultValues[n]);
-                    }
-                }
-                return ls;
-            } else {
-                i++;
-                continue;
             }
+            return ls;
+        }
+        int i = 0;
+        int ini = getByID("* " + key, file);
+        int ini2 = getByID("* endif " + key, file);
+        while (i < secretList.size() && ini < ini2) {
+            if (!secretList.get(ini).equals("* " + key) || !secretList.get(ini2).equals("* endif " + key)) {
+                listlist.add(secretList.get(i));
+            }
+            ini++;
             i++;
         }
         return listlist;
@@ -985,7 +962,20 @@ public class PropertiesAPI {
     public Object getProperties(String key, Object defaultValue) {
         return getProperties(key, defaultValue, PropertiesAPI.fileName);
     }
+    
+    
+    public boolean isNum(String str) {
+        char cstr[] = str.toCharArray();
 
+        int i = 0;
+        while (i < cstr.length) {
+            if (Character.isDigit(cstr[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     public void fakeFree() {
         listlist = null;
         secretList = null;
@@ -1012,60 +1002,4 @@ public class PropertiesAPI {
             throw new IllegalStateException("a problem wtih setting properties, file not found\n" + e);
         }
     }
-
-}
-
-class IsNumber {
-
-    private static List<Character> strchars;
-
-    static {
-        try {
-            strchars = new ArrayList<>();
-        } catch (Exception e) {
-            throw new IllegalStateException("Problem with static constructor:\n", e);
-        }
-    }
-
-    public static boolean isNumber(String str) {
-        int i = 0;
-        char cstr[] = str.toCharArray();
-        while (i < cstr.length) {
-            strchars.add(cstr[i]);
-            i++;
-        }
-        i = 0;
-        while (i < strchars.size()) {
-            if (strchars.stream().filter(Character::isDigit).collect(Collectors.toList()).size() == strchars.size()) {
-                return true;
-            }
-            i++;
-        }
-        return false;
-    }
-
-    public static boolean isNumber(char str[]) {
-        int i = 0;
-        while (i < str.length) {
-            strchars.add(str[i]);
-            i++;
-        }
-        i = 0;
-        while (i < strchars.size()) {
-            if (strchars.stream().filter(Character::isDigit).collect(Collectors.toList()).size() == strchars.size()) {
-                return true;
-            }
-            i++;
-        }
-        return false;
-    }
-
-    public static boolean isNumber(char chr) {
-        return Character.isDigit(chr);
-    }
-
-    public static void fakeFree() {
-        strchars = null;
-    }
-
 }
